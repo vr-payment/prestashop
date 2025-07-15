@@ -1,0 +1,14 @@
+download_packing_slip:
+  path: vRPayment/{orderId}/packingslip
+  methods: [GET]
+  defaults:
+    _controller: PrestaShop\Module\VRPayment\Controller\Admin\processVRPaymentPackingSlip::processVRPaymentPackingSlip
+  requirements:
+      orderId: \d+
+download_invoice:
+  path: vRPayment/{orderId}/invoice
+  methods: [GET]
+  defaults:
+    _controller: PrestaShop\Module\VRPayment\Controller\Admin\processVRPaymentInvoice::processVRPaymentInvoice
+  requirements:
+      orderId: \d+
