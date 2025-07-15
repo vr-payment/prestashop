@@ -1,6 +1,4 @@
 # PrestaShop 8 VR Payment Integration
-This project has now been archived. Future releases can be found [here](https://github.com/whitelabelGithubOwnerName/prestashop-1.7):
-
 This repository contains the PrestaShop VR Payment payment module that enables the shop to process payments with [VR Payment](https://www.vr-payment.de/).
 
 To install module manually by dragging up zip file, please download [.zip archive](https://plugin-documentation.vr-payment.de/vr-payment/prestashop/1.0.11/vrpayment.zip) of module with correct structure required by Prestashop installation
@@ -25,8 +23,17 @@ Support queries can be issued on the [VR Payment support site](https://www.vr-pa
 ____________________________________________________________________________
 | Prestashop 8 version   | Plugin major version   | Supported until        |
 |------------------------|------------------------|------------------------|
+| 9.0.x -                | 9.x                    | Further notice         |
 | 8.0.x - 8.2.x          | 1.x                    | Further notice         |
 ----------------------------------------------------------------------------
+
+## Older versions
+
+### PrestaShop 1.7
+The Wallee integration for Prestashop 1.7 can be downloaded [here](https://github.com/wallee-payment/prestashop-1.7)
+
+### PrestaShop 1.6
+The Wallee integration for Prestashop 1.6 can be downloaded [here](https://github.com/wallee-payment/prestashop-1.6)
 
 ## License
 
