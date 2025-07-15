@@ -49,7 +49,6 @@ class VRPaymentModelCompletionjob extends ObjectModel
         'fields' => array(
             'completion_id' => array(
                 'type' => self::TYPE_INT,
-                'validate' => 'isAnything'
             ),
             'state' => array(
                 'type' => self::TYPE_STRING,
@@ -59,12 +58,10 @@ class VRPaymentModelCompletionjob extends ObjectModel
             ),
             'space_id' => array(
                 'type' => self::TYPE_INT,
-                'validate' => 'isAnything',
                 'required' => true
             ),
             'transaction_id' => array(
                 'type' => self::TYPE_INT,
-                'validate' => 'isAnything',
                 'required' => true
             ),
             'order_id' => array(
@@ -74,7 +71,6 @@ class VRPaymentModelCompletionjob extends ObjectModel
             ),
             'failure_reason' => array(
                 'type' => self::TYPE_STRING,
-                'validate' => 'isAnything'
             ),
             'date_add' => array(
                 'type' => self::TYPE_DATE,
