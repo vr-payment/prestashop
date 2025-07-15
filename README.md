@@ -1,4 +1,4 @@
-# PrestaShop 8 VR Payment Integration
+# PrestaShop VR Payment Integration
 This repository contains the PrestaShop VR Payment payment module that enables the shop to process payments with [VR Payment](https://www.vr-payment.de/).
 
 To install module manually by dragging up zip file, please download [.zip archive](https://plugin-documentation.vr-payment.de/vr-payment/prestashop/2.0.0/vrpayment.zip) of module with correct structure required by Prestashop installation
@@ -23,7 +23,7 @@ Support queries can be issued on the [VR Payment support site](https://www.vr-pa
 ____________________________________________________________________________
 | Prestashop 8 version   | Plugin major version   | Supported until        |
 |------------------------|------------------------|------------------------|
-| 9.0.x -                | 9.x                    | Further notice         |
+| 9.0.x -                | 2.x                    | Further notice         |
 | 8.0.x - 8.2.x          | 1.x                    | Further notice         |
 ----------------------------------------------------------------------------
 
