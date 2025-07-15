@@ -23,7 +23,7 @@ Support queries can be issued on the [VR Payment support site](https://www.vr-pa
 ____________________________________________________________________________
 | Prestashop 8 version   | Plugin major version   | Supported until        |
 |------------------------|------------------------|------------------------|
-| 9.0.x -                | 9.x                    | Further notice         |
+| 9.0.x -                | 2.x                    | Further notice         |
 | 8.0.x - 8.2.x          | 1.x                    | Further notice         |
 ----------------------------------------------------------------------------
 
