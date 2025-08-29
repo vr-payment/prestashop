@@ -1,7 +1,7 @@
 # PrestaShop VR Payment Integration
 This repository contains the PrestaShop VR Payment payment module that enables the shop to process payments with [VR Payment](https://www.vr-payment.de/).
 
-To install module manually by dragging up zip file, please download [.zip archive](https://plugin-documentation.vr-payment.de/vr-payment/prestashop/2.0.0/vrpayment.zip) of module with correct structure required by Prestashop installation
+To install module manually by dragging up zip file, please download [.zip archive](https://docs.plugin-documentation.vr-payment.de/vr-payment/prestashop/2.0.1/vrpayment.zip) of module with correct structure required by Prestashop installation
 
 ##### To use this extension, a [VR Payment](https://gateway.vr-payment.de/user/login) account is required.
 
@@ -12,7 +12,7 @@ To install module manually by dragging up zip file, please download [.zip archiv
 
 ## Documentation
 
-* [English](https://plugin-documentation.vr-payment.de/vr-payment/prestashop/2.0.0/docs/en/documentation.html)
+* [English](https://docs.plugin-documentation.vr-payment.de/vr-payment/prestashop/2.0.1/docs/en/documentation.html)
 
 ## Support
 
@@ -37,7 +37,7 @@ The Wallee integration for Prestashop 1.6 can be downloaded [here](https://githu
 
 ## License
 
-Please see the [license file](https://github.com/vr-payment/prestashop/blob/2.0.0/LICENSE) for more information.
+Please see the [license file](https://github.com/vr-payment/prestashop/blob/2.0.1/LICENSE) for more information.
 
 ## Other PrestaShop Versions
 
