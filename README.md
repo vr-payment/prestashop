@@ -21,7 +21,7 @@ Support queries can be issued on the [VR Payment support site](https://www.vr-pa
 ## Supported versions
 
 ____________________________________________________________________________
-| Prestashop 8 version   | Plugin major version   | Supported until        |
+| Prestashop version   | Plugin major version   | Supported until        |
 |------------------------|------------------------|------------------------|
 | 9.0.x -                | 2.x                    | Further notice         |
 | 8.0.x - 8.2.x          | 1.x                    | Further notice         |
@@ -30,10 +30,7 @@ ____________________________________________________________________________
 ## Older versions
 
 ### PrestaShop 1.7
-The Wallee integration for Prestashop 1.7 can be downloaded [here](https://github.com/wallee-payment/prestashop-1.7)
-
-### PrestaShop 1.6
-The Wallee integration for Prestashop 1.6 can be downloaded [here](https://github.com/wallee-payment/prestashop-1.6)
+The VR Payment integration for Prestashop 1.7 can be downloaded [here](https://github.com/vr-payment/prestashop-1.7)
 
 ## License
 
