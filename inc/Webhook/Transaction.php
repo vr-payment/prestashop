@@ -145,9 +145,6 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
 
     protected function failed(\VRPayment\Sdk\Model\Transaction $transaction, Order $sourceOrder)
     {
-        if (VRPaymentHelper::getOrderMeta($sourceOrder, 'fulfill')) {
-            return;
-        }
         // Do not send email
         VRPaymentBasemodule::startRecordingMailMessages();
         $errorStatusId = Configuration::get(VRPaymentBasemodule::CK_STATUS_FAILED);
