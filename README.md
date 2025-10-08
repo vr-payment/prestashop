@@ -1,7 +1,7 @@
 # PrestaShop 8 VR Payment Integration
 This repository contains the PrestaShop VR Payment payment module that enables the shop to process payments with [VR Payment](https://www.vr-payment.de/).
 
-To install module manually by dragging up zip file, please download [.zip archive](https://plugin-documentation.vr-payment.de/vr-payment/prestashop/1.0.11/vrpayment.zip) of module with correct structure required by Prestashop installation
+To install module manually by dragging up zip file, please download [.zip archive](@WalleeDocPath(/vrpayment.zip)) of module with correct structure required by Prestashop installation
 
 ##### To use this extension, a [VR Payment](https://gateway.vr-payment.de/user/login) account is required.
 
@@ -12,7 +12,7 @@ To install module manually by dragging up zip file, please download [.zip archiv
 
 ## Documentation
 
-* [English](https://plugin-documentation.vr-payment.de/vr-payment/prestashop/1.0.11/docs/en/documentation.html)
+* [English](https://docs.plugin-documentation.vr-payment.de/vr-payment/prestashop/1.0.12/docs/en/documentation.html)
 
 ## Support
 
@@ -21,20 +21,14 @@ Support queries can be issued on the [VR Payment support site](https://www.vr-pa
 ## Supported versions
 
 ____________________________________________________________________________
-| Prestashop version   | Plugin major version   | Supported until        |
+| Prestashop 8 version   | Plugin major version   | Supported until        |
 |------------------------|------------------------|------------------------|
-| 9.0.x -                | 2.x                    | Further notice         |
 | 8.0.x - 8.2.x          | 1.x                    | Further notice         |
 ----------------------------------------------------------------------------
 
-## Older versions
-
-### PrestaShop 1.7
-The VR Payment integration for Prestashop 1.7 can be downloaded [here](https://github.com/vr-payment/prestashop-1.7)
-
 ## License
 
-Please see the [license file](https://github.com/vr-payment/prestashop/blob/1.0.11/LICENSE) for more information.
+Please see the [license file](@WalleeRepoPath(/LICENSE)) for more information.
 
 ## Other PrestaShop Versions
 

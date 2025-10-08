@@ -61,6 +61,10 @@ class VRPaymentServiceToken extends VRPaymentServiceAbstract
 
     protected function updateInfo($spaceId, \VRPayment\Sdk\Model\TokenVersion $tokenVersion)
     {
+        // Return early, since token version state is OBSOLETE
+        if ($tokenVersion->getState() === \VRPayment\Sdk\Model\TokenVersionState::OBSOLETE) {
+            return;
+        }
         $info = VRPaymentModelTokeninfo::loadByToken($spaceId, $tokenVersion->getToken()->getId());
         if (! in_array(
             $tokenVersion->getToken()->getState(),
@@ -79,13 +83,21 @@ class VRPaymentServiceToken extends VRPaymentServiceAbstract
             ->getCustomerId());
         $info->setName($tokenVersion->getName());
 
-        $info->setPaymentMethodId(
-            $tokenVersion->getPaymentConnectorConfiguration()
-                ->getPaymentMethodConfiguration()
-                ->getId()
-        );
-        $info->setConnectorId($tokenVersion->getPaymentConnectorConfiguration()
-            ->getConnector());
+        $paymentConnectorConfiguration = $tokenVersion->getPaymentConnectorConfiguration();
+
+        if ($paymentConnectorConfiguration 
+            && $paymentConnectorConfiguration->getPaymentMethodConfiguration()
+            && $paymentConnectorConfiguration->getConnector()) {
+            $info->setPaymentMethodId(
+                $paymentConnectorConfiguration
+                    ->getPaymentMethodConfiguration()
+                    ->getId()
+            );
+            $info->setConnectorId($paymentConnectorConfiguration->getConnector());
+        } else {
+            // Return early if Payment Connector Configuration is missing for token
+            return;
+        }
 
         $info->setSpaceId($spaceId);
         $info->setState($tokenVersion->getToken()
