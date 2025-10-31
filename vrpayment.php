@@ -32,7 +32,7 @@ class VRPayment extends PaymentModule
         $this->author = 'wallee AG';
         $this->bootstrap = true;
         $this->need_instance = 0;
-        $this->version = '1.0.12';
+        $this->version = '1.0.14';
         $this->displayName = 'VR Payment';
         $this->description = $this->l('This PrestaShop module enables to process payments with %s.');
         $this->description = sprintf($this->description, 'VR Payment');
@@ -121,10 +121,6 @@ class VRPayment extends PaymentModule
             'AdminVRPaymentOrder' => array(
                 'parentId' => -1, // No Tab in navigation
                 'name' => 'VR Payment ' . $this->l('Order Management')
-            ),
-            'AdminVRPaymentCronJobs' => array(
-                'parentId' => Tab::getIdFromClassName('AdminTools'),
-                'name' => 'VR Payment ' . $this->l('CronJobs')
             )
         );
     }
@@ -150,7 +146,6 @@ class VRPayment extends PaymentModule
         $output .= VRPaymentBasemodule::handleSaveDownload($this);
         $output .= VRPaymentBasemodule::handleSaveSpaceViewId($this);
         $output .= VRPaymentBasemodule::handleSaveOrderStatus($this);
-        $output .= VRPaymentBasemodule::handleSaveCronSettings($this);
         $output .= VRPaymentBasemodule::displayHelpButtons($this);
         return $output . VRPaymentBasemodule::displayForm($this);
     }
@@ -165,7 +160,6 @@ class VRPayment extends PaymentModule
             VRPaymentBasemodule::getDocumentForm($this),
             VRPaymentBasemodule::getSpaceViewIdForm($this),
             VRPaymentBasemodule::getOrderStatusForm($this),
-            VRPaymentBasemodule::getCronSettingsForm($this),
         );
     }
 
@@ -179,8 +173,7 @@ class VRPayment extends PaymentModule
             VRPaymentBasemodule::getFeeItemConfigValues($this),
             VRPaymentBasemodule::getDownloadConfigValues($this),
             VRPaymentBasemodule::getSpaceViewIdConfigValues($this),
-            VRPaymentBasemodule::getOrderStatusConfigValues($this),
-            VRPaymentBasemodule::getCronSettingsConfigValues($this)
+            VRPaymentBasemodule::getOrderStatusConfigValues($this)
         );
     }
 
@@ -348,11 +341,6 @@ class VRPayment extends PaymentModule
         }
     }
 
-    public function hookDisplayTop($params)
-    {
-        return  VRPaymentBasemodule::hookDisplayTop($this, $params);
-    }
-
     public function hookActionAdminControllerSetMedia($arr)
     {
         VRPaymentBasemodule::hookActionAdminControllerSetMedia($this, $arr);
@@ -369,10 +357,6 @@ class VRPayment extends PaymentModule
         return $backendController->access('edit');
     }
 
-    public function hookVRPaymentCron($params)
-    {
-        return VRPaymentBasemodule::hookVRPaymentCron($params);
-    }
     /**
      * Show the manual task in the admin bar.
      * The output is moved with javascript to the correct place as better hook is missing.
@@ -382,7 +366,6 @@ class VRPayment extends PaymentModule
     public function hookDisplayAdminAfterHeader()
     {
         $result = VRPaymentBasemodule::hookDisplayAdminAfterHeader($this);
-        $result .= VRPaymentBasemodule::getCronJobItem($this);
         return $result;
     }
 
