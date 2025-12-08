@@ -84,7 +84,7 @@ class VRPaymentBasemodule
     const TOTAL_MODE_WITHOUT_SHIPPING_INC = 4;
 
     const TOTAL_MODE_WITHOUT_SHIPPING_EXC = 5;
-    
+
     private static $recordMailMessages = false;
 
     private static $recordedMailMessages = array();
@@ -278,10 +278,7 @@ class VRPaymentBasemodule
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
             }
             if ($refresh) {
-                $error = Hook::exec('vRPaymentSettingsChanged');
-                if (! empty($error)) {
-                    $output .= $module->displayError($error);
-                }
+                $output .= self::executeSettingsChangedHook($module);
             }
         }
         return $output;
@@ -342,10 +339,7 @@ class VRPaymentBasemodule
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
             }
             if ($refresh) {
-                $error = Hook::exec('vRPaymentSettingsChanged');
-                if (! empty($error)) {
-                    $output .= $module->displayError($error);
-                }
+                $output .= self::executeSettingsChangedHook($module);
             }
         }
         return $output;
@@ -358,6 +352,7 @@ class VRPaymentBasemodule
             if (! $module->getContext()->shop->isFeatureActive() || $module->getContext()->shop->getContext() == Shop::CONTEXT_SHOP) {
                 Configuration::updateValue(self::CK_CART_RECREATION, Tools::getValue(self::CK_CART_RECREATION));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -374,6 +369,7 @@ class VRPaymentBasemodule
             if (! $module->getContext()->shop->isFeatureActive() || $module->getContext()->shop->getContext() == Shop::CONTEXT_SHOP) {
                 Configuration::updateValue(self::CK_MAIL, Tools::getValue(self::CK_MAIL));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -396,6 +392,7 @@ class VRPaymentBasemodule
             if (! $module->getContext()->shop->isFeatureActive() || $module->getContext()->shop->getContext() == Shop::CONTEXT_SHOP) {
                 Configuration::updateValue(self::CK_INTEGRATION, Tools::getValue(self::CK_INTEGRATION));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -418,6 +415,7 @@ class VRPaymentBasemodule
                 Configuration::updateValue(self::CK_SURCHARGE_TOTAL, Tools::getValue(self::CK_SURCHARGE_TOTAL));
                 Configuration::updateValue(self::CK_SURCHARGE_BASE, Tools::getValue(self::CK_SURCHARGE_BASE));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -435,6 +433,7 @@ class VRPaymentBasemodule
                 Configuration::updateValue(self::CK_INVOICE, Tools::getValue(self::CK_INVOICE));
                 Configuration::updateValue(self::CK_PACKING_SLIP, Tools::getValue(self::CK_PACKING_SLIP));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -451,6 +450,7 @@ class VRPaymentBasemodule
             if (! $module->getContext()->shop->isFeatureActive() || $module->getContext()->shop->getContext() == Shop::CONTEXT_SHOP) {
                 Configuration::updateValue(self::CK_SPACE_VIEW_ID, Tools::getValue(self::CK_SPACE_VIEW_ID));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -473,6 +473,7 @@ class VRPaymentBasemodule
                 Configuration::updateValue(self::CK_STATUS_DECLINED, Tools::getValue(self::CK_STATUS_DECLINED));
                 Configuration::updateValue(self::CK_STATUS_FULFILL, Tools::getValue(self::CK_STATUS_FULFILL));
                 $output .= $module->displayConfirmation($module->l('Settings updated', 'basemodule'));
+                $output .= self::executeSettingsChangedHook($module);
             } else {
                 $output .= $module->displayError(
                     $module->l('You can not store the configuration for all Shops or a Shop Group.', 'basemodule')
@@ -658,7 +659,7 @@ class VRPaymentBasemodule
         }
         return $values;
     }
-    
+
     public static function getCartRecreationForm(VRPayment $module)
     {
         $cartRecreationConfig = array(
@@ -729,7 +730,7 @@ class VRPaymentBasemodule
                             'name' => $module->l('Payment page', 'basemodule'),
                             'type' => VRPaymentBasemodule::TOTAL_MODE_BOTH_EXC
                         ),
-                    
+
                     ),
                     'id' => 'type',
                     'name' => 'name'
@@ -1352,6 +1353,15 @@ class VRPaymentBasemodule
         return "";
     }
 
+    private static function executeSettingsChangedHook(VRPayment $module)
+    {
+        $error = Hook::exec('vRPaymentSettingsChanged');
+        if (! empty($error)) {
+            return $module->displayError($error);
+        }
+        return "";
+    }
+
     private static function deleteCachedEntries()
     {
         $toDelete = array(
@@ -1548,7 +1558,7 @@ class VRPaymentBasemodule
                     }
                 }
 
-                
+
                 if (strpos($payment_method, "vrpayment_") === 0) {
                     $id = Tools::substr($payment_method, strpos($payment_method, "_") + 1);
                     $methodConfiguration = new VRPaymentModelMethodconfiguration($id);
