@@ -6,7 +6,7 @@
  * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
  *
  * @author customweb GmbH (http://www.customweb.com/)
- * @copyright 2017 - 2025 customweb GmbH
+ * @copyright 2017 - 2026 customweb GmbH
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache Software License (ASL 2.0)
  */
 
@@ -32,7 +32,7 @@ class VRPayment extends PaymentModule
         $this->author = 'wallee AG';
         $this->bootstrap = true;
         $this->need_instance = 0;
-        $this->version = '2.0.3';
+        $this->version = '2.0.4';
         $this->displayName = 'VR Payment';
         $this->description = $this->l('This PrestaShop module enables to process payments with %s.');
         $this->description = sprintf($this->description, 'VR Payment');
@@ -101,10 +101,17 @@ class VRPayment extends PaymentModule
         return parent::uninstall() && VRPaymentBasemodule::uninstall($this);
     }
 
+    public function upgrade($version)
+    {
+        return true;
+    }
+
     public function installHooks()
     {
         return VRPaymentBasemodule::installHooks($this) && $this->registerHook('paymentOptions') &&
-            $this->registerHook('actionFrontControllerSetMedia');
+            $this->registerHook('actionFrontControllerSetMedia') &&
+            $this->registerHook('actionValidateStepComplete') &&
+            $this->registerHook('actionObjectAddressAddAfter');
     }
 
     public function getBackendControllers()
@@ -192,9 +199,9 @@ class VRPayment extends PaymentModule
         }
         $cart = $params['cart'];
         try {
-            $possiblePaymentMethods = VRPaymentServiceTransaction::instance()->getPossiblePaymentMethods(
-                $cart
-            );
+            $transactionService = VRPaymentServiceTransaction::instance();
+            $transaction = $transactionService->getTransactionFromCart($cart);
+            $possiblePaymentMethods = $transactionService->getPossiblePaymentMethods($cart, $transaction);
         } catch (VRPaymentExceptionInvalidtransactionamount $e) {
             PrestaShopLogger::addLog($e->getMessage() . " CartId: " . $cart->id, 2, null, 'VRPayment');
             $paymentOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
@@ -221,18 +228,7 @@ class VRPayment extends PaymentModule
         }
         $shopId = $cart->id_shop;
         $language = Context::getContext()->language->language_code;
-        $methods = array();
-        foreach ($possiblePaymentMethods as $possible) {
-            $methodConfiguration = VRPaymentModelMethodconfiguration::loadByConfigurationAndShop(
-                $possible->getSpaceId(),
-                $possible->getId(),
-                $shopId
-            );
-            if (!$methodConfiguration->isActive()) {
-                continue;
-            }
-            $methods[] = $methodConfiguration;
-        }
+        $methods = $this->filterShopMethodConfigurations($shopId, $possiblePaymentMethods);
         $result = array();
 
         $this->context->smarty->registerPlugin(
@@ -247,7 +243,6 @@ class VRPayment extends PaymentModule
         foreach (VRPaymentHelper::sortMethodConfiguration($methods) as $methodConfiguration) {
             $parameters = VRPaymentBasemodule::getParametersFromMethodConfiguration($this, $methodConfiguration, $cart, $shopId, $language);
             $parameters['priceDisplayTax'] = Group::getPriceDisplayMethod(Group::getCurrent()->id);
-            $parameters['iframe'] = $cart->iframe;
             $parameters['orderUrl'] = $this->context->link->getModuleLink(
                 'vrpayment',
                 'order',
@@ -275,71 +270,187 @@ class VRPayment extends PaymentModule
         return $result;
     }
 
-    public function hookActionFrontControllerSetMedia($arr)
+    /**
+     * Filters configured method entities for the current shop and the available SDK payment methods.
+     *
+     * @param int $shopId
+     * @param \VRPayment\Sdk\Model\PaymentMethodConfiguration[] $possiblePaymentMethods
+     * @return VRPaymentModelMethodconfiguration[]
+     */
+    protected function filterShopMethodConfigurations($shopId, array $possiblePaymentMethods)
     {
-        if ($this->context->controller->php_self == 'order' || $this->context->controller->php_self == 'cart') {
-            $uniqueId = $this->context->cookie->vrp_device_id;
-            if ($uniqueId == false) {
-                $uniqueId = VRPaymentHelper::generateUUID();
-                $this->context->cookie->vrp_device_id = $uniqueId;
-            }
-            $scriptUrl = VRPaymentHelper::getBaseGatewayUrl() . '/s/' . Configuration::get(
-                VRPaymentBasemodule::CK_SPACE_ID
-            ) . '/payment/device.js?sessionIdentifier=' . $uniqueId;
-            $this->context->controller->registerJavascript(
-                'vrpayment-device-identifier',
-                $scriptUrl,
-                array(
-                    'server' => 'remote',
-                    'attributes' => 'async="async"'
-                )
-            );
+        $configured = VRPaymentModelMethodconfiguration::loadValidForShop($shopId);
+        if (empty($configured) || empty($possiblePaymentMethods)) {
+            return array();
         }
-        if ($this->context->controller->php_self == 'order') {
-            $this->context->controller->registerStylesheet(
-                'vrpayment-checkut-css',
-                'modules/' . $this->name . '/views/css/frontend/checkout.css'
-            );
-            $this->context->controller->registerJavascript(
-                'vrpayment-checkout-js',
-                'modules/' . $this->name . '/views/js/frontend/checkout.js'
-            );
-            Media::addJsDef(
-                array(
-                    'vRPaymentCheckoutUrl' => $this->context->link->getModuleLink(
-                        'vrpayment',
-                        'checkout',
-                        array(),
-                        true
-                    ),
-                    'vrpaymentMsgJsonError' => $this->l(
-                        'The server experienced an unexpected error, you may try again or try to use a different payment method.'
-                    )
-                )
-            );
-            if (isset($this->context->cart) && Validate::isLoadedObject($this->context->cart)) {
-                try {
-                    $jsUrl = VRPaymentServiceTransaction::instance()->getJavascriptUrl($this->context->cart);
-                    $this->context->controller->registerJavascript(
-                        'vrpayment-iframe-handler',
-                        $jsUrl,
-                        array(
-                            'server' => 'remote',
-                            'priority' => 45,
-                            'attributes' => 'id="vrpayment-iframe-handler"'
-                        )
-                    );
-                } catch (Exception $e) {
+
+        $bySpaceAndConfiguration = array();
+        foreach ($configured as $methodConfiguration) {
+            $spaceId = $methodConfiguration->getSpaceId();
+            if (! isset($bySpaceAndConfiguration[$spaceId])) {
+                $bySpaceAndConfiguration[$spaceId] = array();
+            }
+            $bySpaceAndConfiguration[$spaceId][$methodConfiguration->getConfigurationId()] = $methodConfiguration;
+        }
+
+        $result = array();
+        foreach ($possiblePaymentMethods as $possible) {
+            $spaceId = $possible->getSpaceId();
+            $configurationId = $possible->getId();
+            if (isset($bySpaceAndConfiguration[$spaceId][$configurationId])) {
+                $methodConfiguration = $bySpaceAndConfiguration[$spaceId][$configurationId];
+                if ($methodConfiguration->isActive()) {
+                    $result[] = $methodConfiguration;
                 }
             }
         }
-        if ($this->context->controller->php_self == 'order-detail') {
-            $this->context->controller->registerJavascript(
+
+        return $result;
+    }
+
+    public function hookActionFrontControllerSetMedia()
+    {
+        $controller = $this->context->controller;
+
+        if (!$controller) {
+            return;
+        }
+
+        $phpSelf = $controller->php_self;
+        if ($phpSelf === 'order' || $phpSelf === 'cart') {
+
+            // Ensure device ID exists
+            if (empty($this->context->cookie->vrp_device_id)) {
+                $this->context->cookie->vrp_device_id = VRPaymentHelper::generateUUID();
+            }
+
+            $deviceId = $this->context->cookie->vrp_device_id;
+
+            $scriptUrl = VRPaymentHelper::getBaseGatewayUrl() .
+                '/s/' . Configuration::get(VRPaymentBasemodule::CK_SPACE_ID) .
+                '/payment/device.js?sessionIdentifier=' . $deviceId;
+
+            $controller->registerJavascript(
+                'vrpayment-device-identifier',
+                $scriptUrl,
+                [
+                'server' => 'remote',
+                'attributes' => 'async'
+                ]
+            );
+        }
+
+        /**
+         * ORDER PAGE ONLY
+         * Add checkout JS/CSS + iframe handler
+         */
+        if ($phpSelf === 'order') {
+
+            // checkout styles
+            $controller->registerStylesheet(
+                'vrpayment-checkout-css',
+                'modules/' . $this->name . '/views/css/frontend/checkout.css'
+            );
+
+            // checkout JS
+            $controller->registerJavascript(
                 'vrpayment-checkout-js',
+                'modules/' . $this->name . '/views/js/frontend/checkout.js'
+            );
+
+            // define global JS variables
+            Media::addJsDef([
+                'vRPaymentCheckoutUrl' => $this->context->link->getModuleLink(
+                'vrpayment',
+                'checkout',
+                [],
+                true
+                ),
+                'vrpaymentMsgJsonError' => $this->l(
+                'The server experienced an unexpected error, you may try again or try a different payment method.'
+                )
+            ]);
+
+            // Iframe handler JS (only when integration = iframe)
+            $cart = $this->context->cart;
+
+            if ($cart && Validate::isLoadedObject($cart)) {
+                try {
+                    // Get integration type from configuration
+                    // 0 = iframe
+                    // 1 = payment page
+                    $integrationType = (int) Configuration::get(VRPaymentBasemodule::CK_INTEGRATION);
+
+                    // Only load JS when NOT payment page
+                    if ($integrationType !== Configuration::get(VRPaymentBasemodule::CK_INTEGRATION_TYPE_PAYMENT_PAGE)) {
+
+                        $jsUrl = VRPaymentServiceTransaction::instance()
+                            ->getJavascriptUrl($cart);
+
+                        $this->context->controller->registerJavascript(
+                            'vrpayment-iframe-handler',
+                            $jsUrl,
+                            [
+                            'server' => 'remote',
+                            'priority' => 45,
+                            'attributes' => 'id="vrpayment-iframe-handler"'
+                            ]
+                        );
+                    }
+
+                } catch (Exception $e) {
+                    // same behavior: silently ignore
+                }
+            }
+        }
+
+        /**
+         * ORDER-DETAIL PAGE
+         */
+        if ($phpSelf === 'order-detail') {
+            $controller->registerJavascript(
+                'vrpayment-orderdetail-js',
                 'modules/' . $this->name . '/views/js/frontend/orderdetail.js'
             );
         }
     }
+
+    public function hookActionObjectAddressAddAfter($params)
+    {
+        $this->processAddressChange(isset($params['object']) ? $params['object'] : null);
+    }
+
+    public function hookActionValidateStepComplete($params)
+    {
+        if (isset($params['step_name']) && $params['step_name'] === 'addresses') {
+            $this->processAddressChange(null);
+        }
+    }
+
+    /**
+     * Refreshes the pending transaction when the checkout address is created/selected.
+     *
+     * @param Address|null $address
+     */
+    private function processAddressChange($address = null)
+    {
+        $cart = $this->context->cart;
+        if (!$cart || !Validate::isLoadedObject($cart)) {
+            return;
+        }
+
+        try {
+            VRPaymentServiceTransaction::instance()->refreshTransactionFromCart($cart);
+        } catch (Exception $e) {
+            PrestaShopLogger::addLog(
+                'VRPayment address refresh failed: ' . $e->getMessage(),
+                2,
+                null,
+                $this->name
+            );
+        }
+    }
+
 
     public function hookActionAdminControllerSetMedia($arr)
     {
