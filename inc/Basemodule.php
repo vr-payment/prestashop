@@ -5,7 +5,7 @@
  * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
  *
  * @author customweb GmbH (http://www.customweb.com/)
- * @copyright 2017 - 2025 customweb GmbH
+ * @copyright 2017 - 2026 customweb GmbH
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache Software License (ASL 2.0)
  */
 
@@ -36,6 +36,10 @@ class VRPaymentBasemodule
     const CK_MAIL = 'VRP_SHOP_EMAIL';
 
     const CK_INTEGRATION = 'VRP_SHOP_INTEGRATION';
+
+    const CK_INTEGRATION_TYPE_IFRAME = 0;
+
+    const CK_INTEGRATION_TYPE_PAYMENT_PAGE = 1;
 
     const CK_CART_RECREATION = 'VRP_CART_RECREATION';
 
@@ -1389,7 +1393,7 @@ class VRPaymentBasemodule
         $parameters = array();
         $parameters['methodId'] = $methodConfiguration->getId();
         $parameters['configurationId'] = $methodConfiguration->getConfigurationId();
-        $cart->iframe = (bool) Configuration::get(self::CK_INTEGRATION);
+        $parameters['iframe'] = (bool) Configuration::get(self::CK_INTEGRATION);
 
         $parameters['link'] = $module->getContext()->link->getModuleLink(
             'vrpayment',

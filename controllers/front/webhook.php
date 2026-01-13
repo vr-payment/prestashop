@@ -5,7 +5,7 @@
  * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
  *
  * @author customweb GmbH (http://www.customweb.com/)
- * @copyright 2017 - 2025 customweb GmbH
+ * @copyright 2017 - 2026 customweb GmbH
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache Software License (ASL 2.0)
  */
 
@@ -35,9 +35,27 @@ class VRPaymentWebhookModuleFrontController extends ModuleFrontController
             'handleWebhookErrors'
         ));
         try {
-            $requestBody = trim(Tools::file_get_contents("php://input"));
+            $rawRequestBody = Tools::file_get_contents('php://input');
 
-            $parsed = json_decode($requestBody);
+            $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+
+            $installedVersion = VRPaymentTools::getInstalledModuleVersion();
+
+            if (version_compare($installedVersion, '1.0.16', '>=')) {
+                if (empty($signature)) {
+                    throw new Exception('Missing webhook signature.');
+                }
+
+                $encryptionService = new \VRPayment\Sdk\Service\WebhookEncryptionService(
+                    VRPaymentHelper::getApiClient()
+                );
+                // Checking if webhook has correct signature
+                if (!$encryptionService->isContentValid($signature, $rawRequestBody)) {
+                    throw new Exception('Invalid webhook signature.');
+                }
+            }
+
+            $parsed = json_decode(trim($rawRequestBody));
             if ($parsed == false) {
                 throw new Exception('Could not parse request body.');
             }
