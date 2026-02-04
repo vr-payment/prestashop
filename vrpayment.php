@@ -32,7 +32,7 @@ class VRPayment extends PaymentModule
         $this->author = 'wallee AG';
         $this->bootstrap = true;
         $this->need_instance = 0;
-        $this->version = '2.0.4';
+        $this->version = '2.0.5';
         $this->displayName = 'VR Payment';
         $this->description = $this->l('This PrestaShop module enables to process payments with %s.');
         $this->description = sprintf($this->description, 'VR Payment');
