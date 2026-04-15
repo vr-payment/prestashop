@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -718,7 +718,7 @@ class VRPaymentHelper
             self::SHOP_SYSTEM             => 'prestashop',
             self::SHOP_SYSTEM_VERSION     => $shop_version,
             self::SHOP_SYSTEM_AND_VERSION => 'prestashop-' . $major_version . '.' . $minor_version,
-            self::PLUGIN_SYSTEM_VERSION   => '1.0.16',
+            self::PLUGIN_SYSTEM_VERSION   => '1.0.17',
             ];
     }
 }
