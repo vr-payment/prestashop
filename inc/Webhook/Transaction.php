@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -87,7 +87,8 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
             $order->setCurrentState($authorizedStatusId);
             $order->save();
         }
-        VRPaymentBasemodule::stopRecordingMailMessages();
+        $recordedMessages = VRPaymentBasemodule::stopRecordingMailMessages();
+        VRPaymentHelper::storeDeferredEmails($recordedMessages, $sourceOrder);
         if (Configuration::get(VRPaymentBasemodule::CK_MAIL, null, null, $sourceOrder->id_shop)) {
             // Send stored messages
             $messages = VRPaymentHelper::getOrderEmails($sourceOrder);
@@ -121,7 +122,8 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
                 $order->save();
             }
         }
-        VRPaymentBasemodule::stopRecordingMailMessages();
+        $recordedMessages = VRPaymentBasemodule::stopRecordingMailMessages();
+        VRPaymentHelper::storeDeferredEmails($recordedMessages, $sourceOrder);
         VRPaymentServiceTransaction::instance()->updateTransactionInfo($transaction, $sourceOrder);
     }
 
@@ -141,6 +143,7 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
         }
         VRPaymentBasemodule::stopRecordingMailMessages();
         VRPaymentServiceTransaction::instance()->updateTransactionInfo($transaction, $sourceOrder);
+        VRPaymentHelper::deleteOrderEmails($order, VRPaymentBasemodule::EMAIL_KEY_DOWNLOAD);
     }
 
     protected function failed(\VRPayment\Sdk\Model\Transaction $transaction, Order $sourceOrder)
@@ -157,6 +160,7 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
         VRPaymentBasemodule::stopRecordingMailMessages();
         VRPaymentHelper::deleteOrderEmails($sourceOrder);
         VRPaymentServiceTransaction::instance()->updateTransactionInfo($transaction, $sourceOrder);
+        VRPaymentHelper::deleteOrderEmails($order, VRPaymentBasemodule::EMAIL_KEY_DOWNLOAD);
     }
 
     protected function fulfill(\VRPayment\Sdk\Model\Transaction $transaction, Order $sourceOrder)
@@ -178,6 +182,7 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
         }
         VRPaymentBasemodule::stopRecordingMailMessages();
         VRPaymentServiceTransaction::instance()->updateTransactionInfo($transaction, $sourceOrder);
+        VRPaymentHelper::sendDeferredEmails($sourceOrder);
     }
 
     protected function voided(\VRPayment\Sdk\Model\Transaction $transaction, Order $sourceOrder)
@@ -195,5 +200,6 @@ class VRPaymentWebhookTransaction extends VRPaymentWebhookOrderrelatedabstract
         }
         VRPaymentBasemodule::stopRecordingMailMessages();
         VRPaymentServiceTransaction::instance()->updateTransactionInfo($transaction, $sourceOrder);
+        VRPaymentHelper::deleteOrderEmails($order, VRPaymentBasemodule::EMAIL_KEY_DOWNLOAD);
     }
 }
