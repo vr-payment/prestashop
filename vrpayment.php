@@ -3,7 +3,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -32,7 +32,7 @@ class VRPayment extends PaymentModule
         $this->author = 'wallee AG';
         $this->bootstrap = true;
         $this->need_instance = 0;
-        $this->version = '2.0.7';
+        $this->version = '2.0.8';
         $this->displayName = 'VR Payment';
         $this->description = $this->l('This PrestaShop module enables to process payments with %s.');
         $this->description = sprintf($this->description, 'VR Payment');
@@ -111,7 +111,8 @@ class VRPayment extends PaymentModule
         return VRPaymentBasemodule::installHooks($this) && $this->registerHook('paymentOptions') &&
             $this->registerHook('actionFrontControllerSetMedia') &&
             $this->registerHook('actionValidateStepComplete') &&
-            $this->registerHook('actionObjectAddressAddAfter');
+            $this->registerHook('actionObjectAddressAddAfter') &&
+            $this->registerHook('displayPaymentByBinaries');
     }
 
     public function getBackendControllers()
@@ -239,6 +240,14 @@ class VRPayment extends PaymentModule
                 'cleanHtml'
             )
         );
+        $this->context->smarty->registerPlugin(
+            'function',
+            'vrpayment_display_price',
+            array(
+                'VRPaymentSmartyfunctions',
+                'displayPrice'
+            )
+        );
 
         foreach (VRPaymentHelper::sortMethodConfiguration($methods) as $methodConfiguration) {
             $parameters = VRPaymentBasemodule::getParametersFromMethodConfiguration($this, $methodConfiguration, $cart, $shopId, $language);
@@ -264,10 +273,76 @@ class VRPayment extends PaymentModule
                     'module:vrpayment/views/templates/front/hook/payment_form.tpl'
                 )
             );
-            $paymentOption->setModuleName($this->name);
+            // Scoped per method configuration (not just $this->name) so the generic PrestaShop
+            // binary-payment selector (Core's `.js-payment-${moduleName}`, read from this same
+            // value) can tell our own methods apart - see hookDisplayPaymentByBinaries().
+            $paymentOption->setModuleName($this->name . '-' . $parameters['methodId']);
+            $paymentOption->setBinary(true);
             $result[] = $paymentOption;
         }
         return $result;
+    }
+
+    /**
+     * Renders our own "Pay" button for each configured method.
+     *
+     * Required because every PaymentOption returned by hookPaymentOptions() is marked binary
+     * (see above): PrestaShop then hides its own generic "Place order"/confirm button for our
+     * methods and expects the module to provide its own, via this hook, instead. This lets our
+     * own JS drive the full validate -> create order -> widget submit sequence directly from a
+     * button click, which keeps working the same way under both the classic multi-step checkout
+     * and PrestaShop 9's native One Page Checkout - unlike hijacking the generic button's form
+     * submission, which OPC deliberately does not allow (it calls the native
+     * HTMLFormElement.prototype.submit(), bypassing any override).
+     *
+     * @param array $params
+     * @return string
+     */
+    public function hookDisplayPaymentByBinaries($params)
+    {
+        if (!$this->active) {
+            return '';
+        }
+        if (!isset($params['cart']) || !($params['cart'] instanceof Cart)) {
+            return '';
+        }
+        $cart = $params['cart'];
+        $shopId = $cart->id_shop;
+        $language = Context::getContext()->language->language_code;
+        try {
+            $transactionService = VRPaymentServiceTransaction::instance();
+            $transaction = $transactionService->getTransactionFromCart($cart);
+            $possiblePaymentMethods = $transactionService->getPossiblePaymentMethods($cart, $transaction);
+            $methods = $this->filterShopMethodConfigurations($shopId, $possiblePaymentMethods);
+        } catch (Exception $e) {
+            // The live availability check failed. hookPaymentOptions() already marked every
+            // configured method binary, which makes PrestaShop hide its own native Pay button for
+            // them regardless of whether we render one here - so falling back to an empty string,
+            // like hookPaymentOptions() does, would leave the customer with no way to pay at all
+            // until a full page reload. Fall back to every locally-configured active method
+            // instead: order.php already re-validates isActive()/getSpaceId() server-side before
+            // creating an order, so a method that turns out not to actually be payable still
+            // fails safely there.
+            PrestaShopLogger::addLog($e->getMessage() . " CartId: " . $cart->id, 1, null, 'VRPayment');
+            $methods = VRPaymentModelMethodconfiguration::loadValidForShop($shopId);
+        }
+
+        $buttons = array();
+        foreach (VRPaymentHelper::sortMethodConfiguration($methods) as $methodConfiguration) {
+            $parameters = VRPaymentBasemodule::getParametersFromMethodConfiguration($this, $methodConfiguration, $cart, $shopId, $language);
+            $buttons[] = array(
+                'methodId' => $parameters['methodId'],
+                'moduleName' => $this->name . '-' . $parameters['methodId'],
+                'name' => $parameters['name']
+            );
+        }
+        if (empty($buttons)) {
+            return '';
+        }
+        $this->context->smarty->assign('vrpaymentBinaryButtons', $buttons);
+        return $this->context->smarty->fetch(
+            'module:vrpayment/views/templates/front/hook/payment_by_binaries.tpl'
+        );
     }
 
     /**
@@ -500,7 +575,7 @@ class VRPayment extends PaymentModule
         $currency_special = null,
         $dont_touch_amount = false,
         $secure_key = false,
-        Shop $shop = null,
+        ?Shop $shop = null,
         $order_reference = null
     ) {
         VRPaymentBasemodule::validateOrder($this, $id_cart, $id_order_state, $amount_paid, $payment_method, $message, $extra_vars, $currency_special, $dont_touch_amount, $secure_key, $shop, $order_reference);
@@ -516,7 +591,7 @@ class VRPayment extends PaymentModule
         $currency_special = null,
         $dont_touch_amount = false,
         $secure_key = false,
-        Shop $shop = null,
+        ?Shop $shop = null,
         $order_reference = null
     ) {
         parent::validateOrder($id_cart, $id_order_state, $amount_paid, $payment_method, $message, $extra_vars, $currency_special, $dont_touch_amount, $secure_key, $shop, $order_reference);

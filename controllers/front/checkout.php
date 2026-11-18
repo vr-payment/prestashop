@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -61,6 +61,14 @@ class VRPaymentCheckoutModuleFrontController extends ModuleFrontController
                 'There was an issue during the checkout, please try again.',
                 'checkout'
             );
+            // Discard everything printed before, so that the response stays valid JSON
+            // for the javascript, which fetches it with dataType 'json'.
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            if (! headers_sent()) {
+                header('Content-Type: application/json');
+            }
             $this->ajaxRender(json_encode(array(
                 'result' => 'failure'
             )));

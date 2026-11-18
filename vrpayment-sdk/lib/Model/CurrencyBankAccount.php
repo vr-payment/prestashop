@@ -1,8 +1,8 @@
 <?php
 /**
- * VRPay SDK
+ * VR Payment SDK
  *
- * This library allows to interact with the VRPay payment service.
+ * This library allows to interact with the VR Payment payment service.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,10 +126,10 @@ class CurrencyBankAccount implements ModelInterface, ArrayAccess
     /**
      * Constructor
      *
-     * @param mixed[] $data Associated array of property values
+     * @param mixed[]|null $data Associated array of property values
      *                      initializing the model
      */
-    public function __construct(array $data = null)
+    public function __construct(?array $data = null)
     {
         
         $this->container['bank_account'] = isset($data['bank_account']) ? $data['bank_account'] : null;
@@ -248,7 +248,7 @@ class CurrencyBankAccount implements ModelInterface, ArrayAccess
     /**
      * Sets bank_account
      *
-     * @param \VRPayment\Sdk\Model\BankAccount $bank_account 
+     * @param \VRPayment\Sdk\Model\BankAccount $bank_account The bank account this currency bank account belongs to.
      *
      * @return $this
      */
@@ -273,7 +273,7 @@ class CurrencyBankAccount implements ModelInterface, ArrayAccess
     /**
      * Sets currency
      *
-     * @param string $currency 
+     * @param string $currency The currency associated with the bank account.
      *
      * @return $this
      */
@@ -298,7 +298,7 @@ class CurrencyBankAccount implements ModelInterface, ArrayAccess
     /**
      * Sets environment
      *
-     * @param \VRPayment\Sdk\Model\BankAccountEnvironment $environment 
+     * @param \VRPayment\Sdk\Model\BankAccountEnvironment $environment Whether the bank account operates in a test or production environment.
      *
      * @return $this
      */

@@ -1,7 +1,7 @@
 {*
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -41,7 +41,7 @@
 				{foreach from=$affectedOrders item=other}
 					<li>
 						<a href="{$link->getAdminLink('AdminOrders')|escape:'html':'UTF-8'}&amp;vieworder&amp;id_order={$other|intval}">
-							{l s='Order %d' sprintf=$other mod='vrpayment' js=1}
+							{l s='Order %d' sprintf=[$other] mod='vrpayment' js=1}
 						</a>
 					</li>
 				{/foreach}
@@ -59,7 +59,7 @@
 				{foreach from=$affectedOrders item=other}
 					<li>
 						<a href="{$link->getAdminLink('AdminOrders')|escape:'html':'UTF-8'}&amp;vieworder&amp;id_order={$other|intval}">
-							{l s='Order %d' sprintf=$other mod='vrpayment'}
+							{l s='Order %d' sprintf=[$other] mod='vrpayment'}
 						</a>
 					</li>
 				{/foreach}
@@ -94,23 +94,23 @@
 
 {if isset($refundChanges)}
 	<div style="display:none;" class="hidden-print" id="vrpayment_changes_refund">
-		<p id="vrpayment_refund_online_text_total">{l s='This refund is sent to %s and money is transfered back to the customer.' sprintf='VR Payment' mod='vrpayment'}</p>
-		<p id="vrpayment_refund_offline_text_total" style="display:none;">{l s='This refund is sent to %s, but [1]no[/1] money is transfered back to the customer.' tags=['<b>'] sprintf='VR Payment' mod='vrpayment'}</p>
-		<p id="vrpayment_refund_no_text_total" style="display:none;">{l s='This refund is [1]not[/1] sent to %s.' tags=['<b>'] sprintf='VR Payment' mod='vrpayment'}</p>
+		<p id="vrpayment_refund_online_text_total">{l s='This refund is sent to %s and money is transfered back to the customer.' sprintf=['VR Payment'] mod='vrpayment'}</p>
+		<p id="vrpayment_refund_offline_text_total" style="display:none;">{l s='This refund is sent to %s, but [1]no[/1] money is transfered back to the customer.' tags=['<b>'] sprintf=['VR Payment'] mod='vrpayment'}</p>
+		<p id="vrpayment_refund_no_text_total" style="display:none;">{l s='This refund is [1]not[/1] sent to %s.' tags=['<b>'] sprintf=['VR Payment'] mod='vrpayment'}</p>
 		<p id="vrpayment_refund_offline_span_total" class="checkbox" style="display: none;">
 			<label for="vrpayment_refund_offline_cb_total">
 				<input type="checkbox" id="vrpayment_refund_offline_cb_total" name="vrpayment_offline">
-				{l s='Send as offline refund to %s.' sprintf='VR Payment' mod='vrpayment'}
+				{l s='Send as offline refund to %s.' sprintf=['VR Payment'] mod='vrpayment'}
 			</label>
 		</p>
 
-		<p id="vrpayment_refund_online_text_partial">{l s='This refund is sent to %s and money is transfered back to the customer.' sprintf='VR Payment' mod='vrpayment'}</p>
-		<p id="vrpayment_refund_offline_text_partial" style="display:none;">{l s='This refund is sent to %s, but [1]no[/1] money is transfered back to the customer.' tags=['<b>'] sprintf='VR Payment' mod='vrpayment'}</p>
-		<p id="vrpayment_refund_no_text_partial" style="display:none;">{l s='This refund is [1]not[/1] sent to %s.' tags=['<b>'] sprintf='VR Payment' mod='vrpayment'}</p>
+		<p id="vrpayment_refund_online_text_partial">{l s='This refund is sent to %s and money is transfered back to the customer.' sprintf=['VR Payment'] mod='vrpayment'}</p>
+		<p id="vrpayment_refund_offline_text_partial" style="display:none;">{l s='This refund is sent to %s, but [1]no[/1] money is transfered back to the customer.' tags=['<b>'] sprintf=['VR Payment'] mod='vrpayment'}</p>
+		<p id="vrpayment_refund_no_text_partial" style="display:none;">{l s='This refund is [1]not[/1] sent to %s.' tags=['<b>'] sprintf=['VR Payment'] mod='vrpayment'}</p>
 		<p id="vrpayment_refund_offline_span_partial" class="checkbox" style="display: none;">
 			<label for="vrpayment_refund_offline_cb_partial">
 				<input type="checkbox" id="vrpayment_refund_offline_cb_partial" name="vrpayment_offline">
-				{l s='Send as offline refund to %s.' sprintf='VR Payment' mod='vrpayment'}
+				{l s='Send as offline refund to %s.' sprintf=['VR Payment'] mod='vrpayment'}
 			</label>
 		</p>
 	</div>

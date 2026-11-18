@@ -1,7 +1,7 @@
 {
-    "name": "vrpayment/sdk",
-    "version": "4.8.1",
-	"description": "VRPay SDK for PHP",
+	"name": "vrpayment/sdk",
+	"version": "4.9.3",
+	"description": "VR Payment SDK for PHP",
 	"keywords": [
 		"vrpayment",
 		"payment",

@@ -1,8 +1,8 @@
 <?php
 /**
- * VRPay SDK
+ * VR Payment SDK
  *
- * This library allows to interact with the VRPay payment service.
+ * This library allows to interact with the VR Payment payment service.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,14 +120,14 @@ class AbstractWebhookListenerUpdate implements ModelInterface, ArrayAccess
     /**
      * Constructor
      *
-     * @param mixed[] $data Associated array of property values
+     * @param mixed[]|null $data Associated array of property values
      *                      initializing the model
      */
-    public function __construct(array $data = null)
+    public function __construct(?array $data = null)
     {
-        
+
         $this->container['enable_payload_signature_and_state'] = isset($data['enable_payload_signature_and_state']) ? $data['enable_payload_signature_and_state'] : null;
-        
+
         $this->container['entity_states'] = isset($data['entity_states']) ? $data['entity_states'] : null;
         
         $this->container['name'] = isset($data['name']) ? $data['name'] : null;
@@ -229,8 +229,6 @@ class AbstractWebhookListenerUpdate implements ModelInterface, ArrayAccess
         return count($this->listInvalidProperties()) === 0;
     }
 
-    
-
     /**
      * Gets enable_payload_signature_and_state
      *
@@ -254,7 +252,6 @@ class AbstractWebhookListenerUpdate implements ModelInterface, ArrayAccess
 
         return $this;
     }
-    
 
     /**
      * Gets entity_states

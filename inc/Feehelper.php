@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -109,8 +109,6 @@ class VRPaymentFeehelper
                 'surcharge_total_wt' => 0
             );
         }
-        $configuration = VRPaymentVersionadapter::getConfigurationInterface();
-
         $amount = (float) Configuration::get(VRPaymentBasemodule::CK_SURCHARGE_AMOUNT);
 
         $amountConverted = Tools::convertPrice($amount, Currency::getCurrencyInstance((int) $cart->id_currency));
@@ -151,7 +149,7 @@ class VRPaymentFeehelper
             Currency::getCurrencyInstance((int) $cart->id_currency)
         );
 
-        $computePrecision = $configuration->get('_PS_PRICE_COMPUTE_PRECISION_');
+        $computePrecision = VRPaymentVersionadapter::getPriceComputePrecision();
 
         if (Tools::ps_round($total, $computePrecision) >= Tools::ps_round($surchargeBaseConverted, $computePrecision)) {
             return array(
@@ -204,8 +202,6 @@ class VRPaymentFeehelper
             );
         }
 
-        $configuration = VRPaymentVersionadapter::getConfigurationInterface();
-
         $fixed = $methodConfiguration->getFeeFixed();
 
         $feeFixedConverted = Tools::convertPrice($fixed, Currency::getCurrencyInstance((int) $cart->id_currency));
@@ -248,7 +244,7 @@ class VRPaymentFeehelper
         $product = new Product($feeProductId);
 
         $taxGroup = $product->getIdTaxRulesGroup();
-        $computePrecision = $configuration->get('_PS_PRICE_COMPUTE_PRECISION_');
+        $computePrecision = VRPaymentVersionadapter::getPriceComputePrecision();
 
         $result = array(
             'fee_total' => Tools::ps_round($feeTotal, $computePrecision),

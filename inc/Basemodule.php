@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -1331,22 +1331,34 @@ class VRPaymentBasemodule
         try {
             VRPaymentServiceMethodconfiguration::instance()->synchronize();
         } catch (Exception $e) {
-            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, false);
+            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, null);
             $errors[] = $module->l('Synchronization of the payment method configurations failed.', 'basemodule');
         }
         try {
             VRPaymentServiceWebhook::instance()->install();
         } catch (Exception $e) {
-            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, false);
+            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, null);
             $errors[] = $module->l(
                 'Installation of the webhooks failed, please check if the feature is active in your space.',
                 'basemodule'
             );
         }
         try {
+            // Force payload signing on every existing webhook listener so unsigned webhooks can never be sent to us,
+            // even for listeners created before signing was enforced.
+            require_once _PS_MODULE_DIR_ . $module->name . '/inc/Webhooksignature.php';
+            Webhooksignature::run();
+        } catch (Exception $e) {
+            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, null);
+            $errors[] = $module->l(
+                'Enforcing webhook signatures failed, please check if the feature is active in your space.',
+                'basemodule'
+            );
+        }
+        try {
             VRPaymentServiceManualtask::instance()->update();
         } catch (Exception $e) {
-            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, false);
+            PrestaShopLogger::addLog($e->getMessage(), 2, null, null, null);
             $errors[] = $module->l('Update of Manual Tasks failed.', 'basemodule');
         }
         self::deleteCachedEntries();
@@ -1494,7 +1506,7 @@ class VRPaymentBasemodule
         $currency_special = null,
         $dont_touch_amount = false,
         $secure_key = false,
-        Shop $shop = null
+        ?Shop $shop = null
     ) {
         if ($module->active) {
             VRPaymentHelper::startDBTransaction();
@@ -1653,7 +1665,7 @@ class VRPaymentBasemodule
                     die();
                 }
             } catch (Exception $e) {
-                PrestaShopLogger::addLog($e->getMessage(), 3, null, null, false);
+                PrestaShopLogger::addLog($e->getMessage(), 3, null, null, null);
                 VRPaymentHelper::deleteOrderEmails($dataOrder);
                 VRPaymentBasemodule::startRecordingMailMessages();
                 $canceledStatusId = Configuration::get(self::CK_STATUS_FAILED);

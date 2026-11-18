@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -29,20 +29,5 @@ class VRPaymentTools
     public static function hashHmac($algo, $data, $key, $raw_output = false)
     {
         return call_user_func('hash_hmac', $algo, $data, $key, $raw_output);
-    }
-
-    /**
-     * Returns the currently installed vrpayment version of the module from the database.
-     *
-     * @return string|null
-     * @throws PrestaShopException
-     */
-    public static function getInstalledModuleVersion(): ?string
-    {
-        return Db::getInstance()->getValue(
-            'SELECT `version`
-             FROM `' . _DB_PREFIX_ . 'module`
-             WHERE `name` = "' . pSQL('vrpayment') . '"'
-        );
     }
 }

@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -330,8 +330,7 @@ class VRPaymentServiceRefund extends VRPaymentServiceAbstract
         $baseLineItems = $this->getBaseLineItems($spaceId, $transactionId);
         $reductionAmount = VRPaymentHelper::getReductionAmount($baseLineItems, $reductions);
 
-        $configuration = VRPaymentVersionadapter::getConfigurationInterface();
-        $computePrecision = $configuration->get('_PS_PRICE_COMPUTE_PRECISION_');
+        $computePrecision = VRPaymentVersionadapter::getPriceComputePrecision();
 
         if (Tools::ps_round($refundTotal, $computePrecision) != Tools::ps_round($reductionAmount, $computePrecision)) {
             $fixedReductions = array();
@@ -375,7 +374,7 @@ class VRPaymentServiceRefund extends VRPaymentServiceAbstract
      * @param \VRPayment\Sdk\Model\Refund $refund
      * @return \VRPayment\Sdk\Model\LineItem[]
      */
-    protected function getBaseLineItems($spaceId, $transactionId, \VRPayment\Sdk\Model\Refund $refund = null)
+    protected function getBaseLineItems($spaceId, $transactionId, ?\VRPayment\Sdk\Model\Refund $refund = null)
     {
         $lastSuccessfulRefund = $this->getLastSuccessfulRefund($spaceId, $transactionId, $refund);
         if ($lastSuccessfulRefund) {
@@ -433,7 +432,7 @@ class VRPaymentServiceRefund extends VRPaymentServiceAbstract
     protected function getLastSuccessfulRefund(
         $spaceId,
         $transactionId,
-        \VRPayment\Sdk\Model\Refund $refund = null
+        ?\VRPayment\Sdk\Model\Refund $refund = null
     ) {
         $query = new \VRPayment\Sdk\Model\EntityQuery();
 

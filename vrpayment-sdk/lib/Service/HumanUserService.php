@@ -1,8 +1,8 @@
 <?php
 /**
- * VRPay SDK
+ * VR Payment SDK
  *
- * This library allows to interact with the VRPay payment service.
+ * This library allows to interact with the VR Payment payment service.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -414,7 +414,7 @@ class HumanUserService {
 		}
 		// header params
 		$headerParams = [];
-		$headerAccept = $this->apiClient->selectHeaderAccept(['text/csv', 'application/json;charset=utf-8']);
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8', 'text/csv']);
 		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}

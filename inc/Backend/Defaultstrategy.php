@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -418,8 +418,7 @@ class VRPaymentBackendDefaultstrategy implements VRPaymentBackendIstrategy
 
     private function createReductionsPartialRefundType(Order $order, array $parsedData)
     {
-        $configuration = VRPaymentVersionadapter::getConfigurationInterface();
-        $computePrecision = $configuration->get('_PS_PRICE_COMPUTE_PRECISION_');
+        $computePrecision = VRPaymentVersionadapter::getPriceComputePrecision();
 
         $amount = 0;
         $reductions = array();
@@ -774,7 +773,10 @@ class VRPaymentBackendDefaultstrategy implements VRPaymentBackendIstrategy
             }
             $result['voucherCreated'] = true;
             $result['voucherCode'] = $cart_rule->code;
-            $result['voucherAmount'] = Tools::displayPrice($cart_rule->reduction_amount, $order->id_currency, false);
+            $result['voucherAmount'] = Context::getContext()->getCurrentLocale()->formatPrice(
+                $cart_rule->reduction_amount,
+                Currency::getIsoCodeById((int) $order->id_currency)
+            );
         }
         return $result;
     }
@@ -944,7 +946,10 @@ class VRPaymentBackendDefaultstrategy implements VRPaymentBackendIstrategy
                 }
                 $result['voucherCreated'] = true;
                 $result['voucherCode'] = $cartrule->code;
-                $result['voucherAmount'] = Tools::displayPrice($cartrule->reduction_amount, $order->id_currency, false);
+                $result['voucherAmount'] = Context::getContext()->getCurrentLocale()->formatPrice(
+                    $cartrule->reduction_amount,
+                    Currency::getIsoCodeById((int) $order->id_currency)
+                );
             }
         }
         return $result;

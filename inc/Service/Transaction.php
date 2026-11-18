@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -470,7 +470,7 @@ class VRPaymentServiceTransaction extends VRPaymentServiceAbstract
      */
     public function getPossiblePaymentMethods(
         Cart $cart,
-        \VRPayment\Sdk\Model\Transaction $transaction = null
+        ?\VRPayment\Sdk\Model\Transaction $transaction = null
     ) {
         return $this->warmPossiblePaymentMethodCache($cart, $transaction);
     }
@@ -488,7 +488,7 @@ class VRPaymentServiceTransaction extends VRPaymentServiceAbstract
      */
     private function warmPossiblePaymentMethodCache(
         Cart $cart,
-        \VRPayment\Sdk\Model\Transaction $transaction = null,
+        ?\VRPayment\Sdk\Model\Transaction $transaction = null,
         $forceReload = false,
         $failSilently = false
     ) {

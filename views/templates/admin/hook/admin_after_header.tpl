@@ -1,7 +1,7 @@
 {*
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -28,7 +28,7 @@
 					{if $manualTotal > 0}
 						<a href="{$manualUrl|escape:'html':'UTF-8'}" target="_blank">
 							<p>{if $manualTotal > 1}
-								{l s='There are %s manual tasks that need your attention.' sprintf=$manualTotal mod='vrpayment'}
+								{l s='There are %s manual tasks that need your attention.' sprintf=[$manualTotal] mod='vrpayment'}
 							{else}
 								{l s='There is a manual task that needs your attention.' mod='vrpayment'}
 							{/if}

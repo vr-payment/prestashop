@@ -1,8 +1,8 @@
 <?php
 /**
- * VRPay SDK
+ * VR Payment SDK
  *
- * This library allows to interact with the VRPay payment service.
+ * This library allows to interact with the VR Payment payment service.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,10 +125,10 @@ class AbstractTokenUpdate implements ModelInterface, ArrayAccess
     /**
      * Constructor
      *
-     * @param mixed[] $data Associated array of property values
+     * @param mixed[]|null $data Associated array of property values
      *                      initializing the model
      */
-    public function __construct(array $data = null)
+    public function __construct(?array $data = null)
     {
         
         $this->container['customer_email_address'] = isset($data['customer_email_address']) ? $data['customer_email_address'] : null;

@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -22,22 +22,20 @@ class VRPaymentOrderModuleFrontController extends ModuleFrontController
                 'There was a technical issue, please try again.',
                 'order'
             );
-            echo json_encode(
+            $this->sendJsonResponse(
                 array(
                     'result' => 'failure',
                     'redirect' => $this->context->link->getPageLink('order', true, null)
                 )
             );
-            die();
         }
         $cart = $this->context->cart;
         $redirect = $this->checkAvailablility($cart);
         if (! empty($redirect)) {
-            echo json_encode(array(
+            $this->sendJsonResponse(array(
                 'result' => 'failure',
                 'redirect' => $redirect
             ));
-            die();
         }
 
         $spaceId = Configuration::get(VRPaymentBasemodule::CK_SPACE_ID, null, null, $cart->id_shop);
@@ -47,13 +45,12 @@ class VRPaymentOrderModuleFrontController extends ModuleFrontController
                 'This payment method is no longer available, please try another one.',
                 'order'
             );
-            echo json_encode(
+            $this->sendJsonResponse(
                 array(
                     'result' => 'failure',
                     'redirect' => $this->context->link->getPageLink('order', true, null)
                 )
             );
-            die();
         }
         // Ensure Fees are correct
         VRPaymentFeehelper::removeFeeSurchargeProductsFromCart($cart);
@@ -61,11 +58,10 @@ class VRPaymentOrderModuleFrontController extends ModuleFrontController
         VRPaymentFeehelper::addFeeProductToCart($methodConfiguration, $cart);
         if ($cartHash != VRPaymentHelper::calculateCartHash($cart)) {
             $this->context->cookie->vrp_error = $this->module->l('The cart was changed, please try again.', 'order');
-            echo json_encode(array(
+            $this->sendJsonResponse(array(
                 'result' => 'failure',
                 'reload' => 'true'
             ));
-            die();
         }
         $orderState = VRPaymentOrderstatus::getRedirectOrderStatus();
         try {
@@ -88,26 +84,47 @@ class VRPaymentOrderModuleFrontController extends ModuleFrontController
                     $GLOBALS['vrpaymentTransactionIds']['spaceId'],
                     $GLOBALS['vrpaymentTransactionIds']['transactionId']
                 );
-                echo json_encode(array(
+                $this->sendJsonResponse(array(
                     'result' => 'redirect',
                     'redirect' => $url
                 ));
-                die();
             }
-            echo json_encode(array(
+            $this->sendJsonResponse(array(
                 'result' => 'success'
             ));
-            die();
         } catch (Exception $e) {
             $this->context->cookie->vrp_error = VRPaymentHelper::cleanExceptionMessage($e->getMessage());
-            echo json_encode(
+            $this->sendJsonResponse(
                 array(
                     'result' => 'failure',
                     'redirect' => $this->context->link->getPageLink('order', true, null)
                 )
             );
-            die();
         }
+    }
+
+    /**
+     * Sends the given data as JSON response and ends the request.
+     *
+     * Any output buffered before is discarded, so that the response body stays valid
+     * JSON. The checkout javascript fetches this with dataType 'json', so anything
+     * printed before the response (a PHP notice on a shop with display_errors enabled,
+     * or output of another module's hook) makes the parsing fail. The javascript then
+     * runs into its error handler and tells the customer that the payment failed,
+     * although the order has already been created and the transaction is authorized.
+     *
+     * @param array $response
+     */
+    protected function sendJsonResponse(array $response)
+    {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        if (! headers_sent()) {
+            header('Content-Type: application/json');
+        }
+        echo json_encode($response);
+        die();
     }
 
     /**

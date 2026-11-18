@@ -2,7 +2,7 @@
 /**
  * VR Payment Prestashop
  *
- * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de/).
+ * This Prestashop module enables to process payments with VR Payment (https://www.vr-payment.de).
  *
  * @author customweb GmbH (http://www.customweb.com/)
  * @copyright 2017 - 2026 customweb GmbH
@@ -15,7 +15,7 @@ class AdminVRPaymentDocumentsController extends ModuleAdminController
     {
         parent::postProcess();
         // We want to be sure that displaying PDF is the last thing this controller will do
-        exit();
+        VRPaymentHelper::endAdminRequest();
     }
 
     public function initProcess()
@@ -28,14 +28,13 @@ class AdminVRPaymentDocumentsController extends ModuleAdminController
         if ($access['view'] === '1' && ($action = Tools::getValue('action'))) {
             $this->action = $action;
         } else {
-            die(
-                Tools::displayError(
-                    $this->module->l(
-                        'You do not have permission to view this.',
-                        'adminvrpaymentdocumentscontroller'
-                    )
+            echo Tools::displayError(
+                $this->module->l(
+                    'You do not have permission to view this.',
+                    'adminvrpaymentdocumentscontroller'
                 )
             );
+            VRPaymentHelper::endAdminRequest();
         }
     }
 
